@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style type="text/css">
+		*{
+			margin: 0;
+			padding: 0;
+		}
+		.img-list .item{
+			display: block;
+			position: relative;
+		}
+		.img-list .item img{
+			display: block;
+			width: 500px;
+			background: grey;
+		}
+		.img-list .item img{
+			background: url("./images/loading.gif") no-repeat center;
+		}
+		#item1 img{
+			height: 100px;
+		}
+		#item2 img{
+			height: 300px;
+		}
+		#item3 img{
+			height: 400px;
+		}
+		.img-list .item span{
+			position: absolute;
+			top: 10px;
+			left: 10px;
+			font-family: "Microsoft YaHei";
+			font-size: 30px;
+			color: #fff;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<ul class="img-list">
+			<li class="item" id="item1">
+				<img data-src="http://h.hiphotos.baidu.com/image/pic/item/8601a18b87d6277f9174f8b120381f30e824fcd1.jpg" alt="">
+				<span></span>
+			</li>
+			<li class="item" id="item2">
+				<img data-src="http://h.hiphotos.baidu.com/image/pic/item/eaf81a4c510fd9f990609fe02d2dd42a2934a4c0.jpg" alt="">
+				<span></span>
+			</li>
+			<li class="item" id="item3">
+				<img data-src="http://e.hiphotos.baidu.com/image/pic/item/a2cc7cd98d1001e94d4bde86b00e7bec55e797c0.jpg" alt="">
+				<span></span>
+			</li>
+		</ul>
+		<button>开始合体！</button>
+	</div>
+	<script type="text/javascript">
+		/*(function(){
+			function loadImage(imgNode, callback){
+				var image = new Image();
+				image.onload = function(){
+					image.onload = null;
+					imgNode.parentNode.replaceChild(image, imgNode);
+					callback(image);
+				}
+				image.src = imgNode.getAttribute('data-src');
+			}
+			var imgNodes = document.querySelectorAll('img');
+			loadImage(imgNodes[0], function(newImg){
+				var txt = newImg.parentNode.querySelector('span');
+				txt.innerText = '我来组成头部';
+				loadImage(imgNodes[1], function(newImg){
+					var txt = newImg.parentNode.querySelector('span');
+					txt.innerText = '我来组成脚和腿';
+				});
+			});
+		})();*/
+
+		//普通写法
+		/*{
+			function loadImage(imgNode, callback){
+				let image = new Image();
+				image.onload = () => {
+					image.onload = null;
+					imgNode.parentNode.replaceChild(image, imgNode);
+					callback(image);
+				}
+				img.onerror = (e) => {
+					callback(null);
+				}
+				image.src = imgNode.getAttribute('data-src');
+			}
+
+			let imgNodes = document.querySelectorAll('img');
+			loadImage(imgNodes[0], (newImg) => {
+				if(!newImg) alert("load image failed");
+				let txt = newImg.parentNode.querySelector('span');
+				txt.innerText = '我来组成头部';
+				loadImage(imgNodes[1], (newImg) => {
+					if(!newImg) alert("load image failed");
+					let txt = newImg.parentNode.querySelector('span');
+					txt.innerText = '我来组成脚和腿';
+				});
+			});
+		};
+*/
+		//Promise
+		/*{
+			function loadImage(imgNode){
+				let promise = new Promise((resolve, reject) => {
+					let image = new Image();
+					image.onload = () => {
+						image.onload = null;
+						imgNode.parentNode.replaceChild(image, imgNode);
+						resolve(image);
+					}
+					image.onerror = (err) => {
+						reject(err);
+					}
+					image.src = imgNode.getAttribute('data-src');
+				});
+				return promise;
+			}
+
+			let imgNodes = document.querySelectorAll('img');
+			loadImage(imgNodes[0])
+			.then((newImg) => {
+				let txt = newImg.parentNode.querySelector('span');
+				txt.innerText = '我来组成头部';
+				return loadImage(imgNodes[1]);
+			})
+			.then((newImg) => {
+				let txt = newImg.parentNode.querySelector('span');
+				txt.innerText = '我来组成脚和腿';
+			})
+			.catch((err) => {
+				alert("load image failed");
+			})
+		}*/
+
+		//Generator+trunk
+		/*{
+			function loadImageTrunk(imgNode, callback){
+				let image = new Image();
+				return function(callback){
+					image.onload = () => {
+						image.onload = null;
+						imgNode.parentNode.replaceChild(image, imgNode);
+						callback(image);
+					}
+					image.onerror = (e) => {
+						callback(null);
+					}
+					image.src = imgNode.getAttribute('data-src');
+				}
+			}
+
+			var imgNodes = document.querySelectorAll('img');
+			function* task(){
+				let r1 = yield loadImageTrunk(imgNodes[0]);
+				let txt = r1.parentNode.querySelector('span');
+				txt.innerText = '我来组成头部';
+				var r2 = yield loadImageTrunk(imgNodes[1]);
+				txt = r2.parentNode.querySelector('span');
+				txt.innerText = '我来组成脚和腿';
+			}
+
+			let g = task();
+			let r1 = g.next();
+			r1.value((newImg) => {
+				let r2 = g.next(newImg);
+				r2.value((newImg) => {
+					g.next(newImg);
+				})
+			})
+		}*/
+
+		/*//Generator+Promise
+		{
+			function loadImage(imgNode){
+				let promise = new Promise((resolve, reject) => {
+					let image = new Image();
+					image.onload = () => {
+						image.onload = null;
+						imgNode.parentNode.replaceChild(image, imgNode);
+						resolve(image);
+					}
+					image.onerror = (err) => {
+						reject(err);
+					}
+					image.src = imgNode.getAttribute('data-src');
+				});
+				return promise;
+			}
+
+			let imgNodes = document.querySelectorAll('img');
+			function* task(){
+				let r1 = yield loadImage(imgNodes[0]);
+				let txt = r1.parentNode.querySelector('span');
+				txt.innerText = '我来组成头部';
+				var r2 = yield loadImage(imgNodes[1]);
+				txt = r2.parentNode.querySelector('span');
+				txt.innerText = '我来组成脚和腿';
+			}
+
+			let g = task();
+			let r1 = g.next();
+			r1.value.then((newImg) => {
+				let r2 = g.next(newImg);
+				return r2.value;
+			}).then((newImg) => {
+				g.next(newImg);
+			}).catch((err) => {
+				alert("load image failed");
+			})
+		}*/
+
+		//Generator+trunk+runner
+		/*{
+			function loadImageTrunk(imgNode, callback){
+				let image = new Image();
+				return function(callback){
+					image.onload = () => {
+						image.onload = null;
+						imgNode.parentNode.replaceChild(image, imgNode);
+						callback(image);
+					}
+					image.onerror = (e) => {
+						callback(null);
+					}
+					image.src = imgNode.getAttribute('data-src');
+				}
+			}
+
+			var imgNodes = document.querySelectorAll('img');
+			function* task(){
+				let r1 = yield loadImageTrunk(imgNodes[0]);
+				let txt = r1.parentNode.querySelector('span');
+				txt.innerText = '我来组成头部';
+				var r2 = yield loadImageTrunk(imgNodes[1]);
+				txt = r2.parentNode.querySelector('span');
+				txt.innerText = '我来组成脚和腿';
+			}
+
+			function run(task){
+				let g = task();
+				function next(data){
+					let r = g.next(data);
+					if(r.done) return;
+					r.value(next);
+				}
+				next();
+			}
+			function run1(task){
+				let g = task();
+				function next(input){
+					let r = g.next(input);
+					if(r.done) return;
+					r.value(function(output){
+						next(output);
+					});
+				}
+				next();
+			}
+
+			run1(task);
+		}*/
+
+		//Generator+Promise+runner
+		{
+			function loadImage(imgNode){
+				let promise = new Promise((resolve, reject) => {
+					let image = new Image();
+					image.onload = () => {
+						image.onload = null;
+						imgNode.parentNode.replaceChild(image, imgNode);
+						resolve(image);
+					}
+					image.onerror = (err) => {
+						reject(err);
+					}
+					image.src = imgNode.getAttribute('data-src');
+				});
+				return promise;
+			}
+
+			let imgNodes = document.querySelectorAll('img');
+
+			function* task(){
+				try{
+					let r1 = yield loadImage(imgNodes[0]);
+					let txt = r1.parentNode.querySelector('span');
+					txt.innerText = '我来组成头部';
+					var r2 = yield loadImage(imgNodes[1]);
+					txt = r2.parentNode.querySelector('span');
+					txt.innerText = '我来组成躯干和手臂';
+					var r3 = yield loadImage(imgNodes[2]);
+					txt = r3.parentNode.querySelector('span');
+					txt.innerText = '我来组成脚和腿';
+				}catch(err){
+					alert("load image failed");
+				}
+			}
+
+			function run(task) {
+				let g = task();
+				function next(data){
+					let r = g.next(data);
+					if(r.done) return;
+					r.value.then(next).catch(function(err){
+						g.throw(err);
+					});
+				}
+				next();
+			}
+			function run1(task) {
+				let g = task();
+				function next(input){
+					let r = g.next(input);
+					if(r.done) return;
+					r.value.then(function(output){
+						next(output);
+					}).catch(function(err){
+						g.throw(err);
+					});
+				}
+				next();
+			}
+			run1(task);
+		}
+
+		/*//async
+		function loadImage(imgNode){
+			let promise = new Promise((resolve, reject) => {
+				let image = new Image();
+				image.onload = () => {
+					image.onload = null;
+					imgNode.parentNode.replaceChild(image, imgNode);
+					resolve(image);
+				}
+				image.onerror = (err) => {
+					reject(err);
+				}
+				image.src = imgNode.getAttribute('data-src');
+			});
+			return promise;
+		}
+
+		let imgNodes = document.querySelectorAll('img');
+
+		async function task(){
+			try{
+				let r1 = await loadImage(imgNodes[0]);
+				let txt = r1.parentNode.querySelector('span');
+				txt.innerText = '我来组成头部';
+				var r2 = await loadImage(imgNodes[1]);
+				txt = r2.parentNode.querySelector('span');
+				txt.innerText = '我来组成脚和腿';
+			}catch(err){
+				alert('load image failed');
+			}
+		}
+
+		document.querySelector('button').addEventListener('click', task);*/
+
+	</script>
+</body>
+</html>
